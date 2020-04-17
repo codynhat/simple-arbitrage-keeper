@@ -49,7 +49,7 @@ class SimpleArbitrageKeeper:
 
         parser = argparse.ArgumentParser("simple-arbitrage-keeper")
 
-        parser.add_argument("--rpc-host", type=str, default="localhost",
+        parser.add_argument("--rpc-endpoint", type=str, default="localhost",
                             help="JSON-RPC host (default: `localhost')")
 
         parser.add_argument("--rpc-port", type=int, default=8545,
@@ -108,7 +108,7 @@ class SimpleArbitrageKeeper:
 
         self.arguments = parser.parse_args(args)
 
-        self.web3 = kwargs['web3'] if 'web3' in kwargs else Web3(HTTPProvider(endpoint_uri=f"https://{self.arguments.rpc_host}:{self.arguments.rpc_port}",
+        self.web3 = kwargs['web3'] if 'web3' in kwargs else Web3(HTTPProvider(endpoint_uri=f"{self.arguments.rpc_endpoint}",
                                                                               request_kwargs={"timeout": self.arguments.rpc_timeout}))
         self.web3.eth.defaultAccount = self.arguments.eth_from
         register_keys(self.web3, self.arguments.eth_key)
@@ -116,9 +116,6 @@ class SimpleArbitrageKeeper:
 
         self.sai = ERC20Token(web3=self.web3, address=Address('0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359'))  # Mainnet Sai
         self.dai = ERC20Token(web3=self.web3, address=Address('0x6b175474e89094c44da98b954eedeac495271d0f'))  # Mainnet Dai
-
-        self.ksai = ERC20Token(web3=self.web3, address=Address('0xC4375B7De8af5a38a93548eb8453a498222C4fF2')) #Kovan Sai
-        self.kdai = ERC20Token(web3=self.web3, address=Address('0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa')) #Kovan Dai
 
         self.entry_token = ERC20Token(web3=self.web3, address=Address(self.arguments.entry_token))
         self.arb_token = ERC20Token(web3=self.web3, address=Address(self.arguments.arb_token))
@@ -199,9 +196,9 @@ class SimpleArbitrageKeeper:
 
 
     def token_name(self, address: Address) -> str:
-        if address == self.ksai.address or address == self.sai.address:
+        if address == self.sai.address:
             return "SAI"
-        elif address == self.kdai.address or address == self.dai.address:
+        elif address == self.dai.address:
             return "DAI"
         else:
             return str(address)
